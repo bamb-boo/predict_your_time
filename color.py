@@ -2,10 +2,13 @@ import tkinter as tk
 import random 
 import time
 
-colors = ["#93C69A", "#99CDA2", "#9ED3A9", "#A4DAB1",
-          "#A9E0B8", "#AFE7C0", "#B4EDC7", "#BAF4CF", "#BDF2C2",
-          "#C2F3C6", "#C5F4CA", "#C9F4CE", "#CCF5D1", "#D0F6D5",
-          "#D3F7D9", "#D7F8DD", "#DAF8E1", "#DEF9E1", "#EFFCF0"
+colors = ["#B0EBB6", "#B2ECC7", "#B5EDC9", "#B7EDCB", "#BAEECE", "#BCEED0", 
+    "#BFEFD2", "#C1F0D4", "#C4F0D6", "#C6F1D9", "#C9F1DB", "#CBF2DD", 
+    "#CEF3DF", "#D0F3E1", "#D3F4E4", "#D5F4E6", "#D8F5E8", "#DAF6EA", 
+    "#DDF6EC", "#DFF7EE", "#E2F7F0", "#E4F8F2", "#E7F8F4", "#E9F9F6", 
+    "#ECF9F9", "#EEFAFB", "#F1FAFD", "#F3FBFF", "#F4FCFE", "#F5FCFC", 
+    "#F5FBFA", "#F6FBFA", "#F7FCFA", "#F8FCFB", "#F9FDFC", "#FAFCFC", 
+    "#FDFDFD", "#EFFCF0"
 ]
 
 number=0
@@ -14,12 +17,15 @@ def color_on():
 
 def color_change(number):
     if number<len(colors):
+        current=400-(number*10.8108)
+        label.place(relx=0.5, rely=0.5, anchor="center", width=current, height=current)
         label.config(bg=colors[number])
-        root.after(20, lambda: color_change(number+1))
+        root.after(10, lambda: color_change(number+1))
 
 def color_off():
     global pressed, done
     pressed=False
+    label.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
     label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holder the space key!")
     done=True
 
@@ -88,7 +94,7 @@ def restart(event):
 root=tk.Tk()
 root.geometry("400x400")
 label=tk.Label(root)
-label.pack(expand=True, fill="both")
+label.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
 root.bind("<KeyPress-space>", spacedown)
 root.bind("<KeyRelease-space>", spaceup)
 root.bind("<KeyPress-r>", restart)
