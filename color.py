@@ -2,16 +2,25 @@ import tkinter as tk
 import random 
 import time
 
+colors = ["#93C69A", "#99CDA2", "#9ED3A9", "#A4DAB1",
+          "#A9E0B8", "#AFE7C0", "#B4EDC7", "#BAF4CF", "#BDF2C2",
+          "#C2F3C6", "#C5F4CA", "#C9F4CE", "#CCF5D1", "#D0F6D5",
+          "#D3F7D9", "#D7F8DD", "#DAF8E1", "#DEF9E1", "#EFFCF0"
+]
+
+number=0
 def color_on():
     label.config(text="", bg="#ADEBB3")
 
-def color_change():
-    label.config(bg="#8EC093", text="")
-    
+def color_change(number):
+    if number<len(colors):
+        label.config(bg=colors[number])
+        root.after(20, lambda: color_change(number+1))
+
 def color_off():
     global pressed, done
     pressed=False
-    label.config(bg="#121212", fg="#FFFFFF", text="try to match the time by holder the space key!")
+    label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holder the space key!")
     done=True
 
 def spacedown(event):
@@ -32,13 +41,13 @@ def spaceup(event):
         pressed=False
         userduration=round(time.perf_counter()-userstart, 2)
 
-        accuracy=round((userduration/(randtime+1))*100, 2)
+        accuracy=round((userduration/(randtime+1+0.380))*100, 2)
         if accuracy > 100:
             correct_acc = accuracy-100
             accuracy=100-correct_acc
 
         results=(
-            f"target {round(randtime+1, 2)}s \n"
+            f"target {round(randtime+1+0.380, 2)}s \n"
             f"your time {round(userduration, 2)}s \n"
             f"accuracy {round(accuracy, 2)}% \n"
             f"click r to restart"
@@ -68,6 +77,7 @@ def begin():
     root.after(2000, two)
     root.after(2800, one)
     root.after(3600, color_on)
+    root.after(3600+int(randtime*1000), lambda:color_change(number))
     root.after(total, color_off)
 
 def restart(event):
