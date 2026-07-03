@@ -12,26 +12,35 @@ colors = ["#B0EBB6", "#B2ECC7", "#B5EDC9", "#B7EDCB", "#BAEECE", "#BCEED0",
 ]
 
 number=0
+fade_duration=0
+start=0
 def color_on():
+    global start
     label.config(text="", bg="#ADEBB3")
+    start=time.perf_counter()
 
 def color_change(number):
+    global fade_duration
     if number<len(colors):
         current=400-(number*10.8108)
         label.place(relx=0.5, rely=0.5, anchor="center", width=current, height=current)
         label.config(bg=colors[number])
         root.after(10, lambda: color_change(number+1))
+    else:
+        color_off()
 
 def color_off():
-    global pressed, done
+    global pressed, done, actual
+    end=time.perf_counter()
+    actual=end-start
     pressed=False
     label.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
     label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holder the space key!")
     done=True
 
 def spacedown(event):
-    global userstart, pressed, done
-    if not done:
+    global userstart, pressed, done, attempt
+    if not done or attempt:
         return
     if not pressed:
         pressed=True
@@ -39,21 +48,22 @@ def spacedown(event):
         label.config(bg="#ADEBB3", text="")
 
 def spaceup(event):
-    global pressed, done, randtime
-    if not done:
+    global pressed, done, randtime, attempt
+    if not done or attempt:
         return
     
     if pressed:
         pressed=False
+        attempt=True
         userduration=round(time.perf_counter()-userstart, 2)
 
-        accuracy=round((userduration/(randtime+1+0.380))*100, 2)
+        accuracy=round((userduration/(actual))*100, 2)
         if accuracy > 100:
             correct_acc = accuracy-100
             accuracy=100-correct_acc
 
         results=(
-            f"target {round(randtime+1+0.380, 2)}s \n"
+            f"target {round(actual, 2)}s \n"
             f"your time {round(userduration, 2)}s \n"
             f"accuracy {round(accuracy, 2)}% \n"
             f"click r to restart"
@@ -70,13 +80,17 @@ def one():
     label.config(text="1")
 
 def begin():
-    global randtime, total, pressed, done, userstart
+    global randtime, total, pressed, done, userstart, attempt, totaltime
     randtime=round(random.uniform(1.0, 4.0),2)
+    fade = (len(colors)-1)*10
+    totaltime=fade/1000+randtime
     userstart=0.0
     userduration=0.0
     pressed=True
     done=False
+    attempt=False
     total=int(((4.4+randtime)*1000))
+    total=3600+int(randtime*1000)+fade
 
     label.config(text="determine the length of the flash", bg="#FFFFFF", fg="#000000")
     root.after(1000, three)
@@ -84,7 +98,6 @@ def begin():
     root.after(2800, one)
     root.after(3600, color_on)
     root.after(3600+int(randtime*1000), lambda:color_change(number))
-    root.after(total, color_off)
 
 def restart(event):
     global done
