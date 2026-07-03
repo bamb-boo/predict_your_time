@@ -14,12 +14,14 @@ colors = ["#B0EBB6", "#B2ECC7", "#B5EDC9", "#B7EDCB", "#BAEECE", "#BCEED0",
 number=0
 fade_duration=0
 start=0
-def color_on():
+restart_done=False
+
+def color_on(): #initial green flash without fade 
     global start
     label.config(text="", bg="#ADEBB3")
     start=time.perf_counter()
 
-def color_change(number):
+def color_change(number): #fade+size decrease
     global fade_duration
     if number<len(colors):
         current=400-(number*10.8108)
@@ -29,16 +31,16 @@ def color_change(number):
     else:
         color_off()
 
-def color_off():
+def color_off(): #color's done, match-time text
     global pressed, done, actual
     end=time.perf_counter()
     actual=end-start
     pressed=False
     label.place(relx=0.5, rely=0.5, anchor="center", width=400, height=400)
-    label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holder the space key!")
+    label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holding the space key!")
     done=True
 
-def spacedown(event):
+def spacedown(event): #registers keypress and begins timer
     global userstart, pressed, done, attempt
     if not done or attempt:
         return
@@ -47,14 +49,15 @@ def spacedown(event):
         userstart=time.perf_counter()
         label.config(bg="#ADEBB3", text="")
 
-def spaceup(event):
-    global pressed, done, randtime, attempt
+def spaceup(event): #registers keyremoval, stops time, calculates accuracy and outputs
+    global pressed, done, randtime, attempt, restart_done
     if not done or attempt:
         return
     
     if pressed:
         pressed=False
         attempt=True
+        restart_done=True
         userduration=round(time.perf_counter()-userstart, 2)
 
         accuracy=round((userduration/(actual))*100, 2)
@@ -79,8 +82,9 @@ def two():
 def one():
     label.config(text="1")
 
-def begin():
-    global randtime, total, pressed, done, userstart, attempt, totaltime
+def begin(): #to begin code, restart functionality
+    global randtime, total, pressed, done, userstart, attempt, totaltime, restart_done, userduration
+    actual=0
     randtime=round(random.uniform(1.0, 4.0),2)
     fade = (len(colors)-1)*10
     totaltime=fade/1000+randtime
@@ -88,21 +92,24 @@ def begin():
     userduration=0.0
     pressed=True
     done=False
+    restart_done=False
     attempt=False
     total=int(((4.4+randtime)*1000))
     total=3600+int(randtime*1000)+fade
 
     label.config(text="determine the length of the flash", bg="#FFFFFF", fg="#000000")
-    root.after(1000, three)
-    root.after(2000, two)
-    root.after(2800, one)
-    root.after(3600, color_on)
-    root.after(3600+int(randtime*1000), lambda:color_change(number))
+    root.after(1500, three)
+    root.after(2500, two)
+    root.after(3500, one)
+    root.after(4500, color_on)
+    root.after(4500+int(randtime*1000), lambda:color_change(number))
 
-def restart(event):
-    global done
-    if done:
+def restart(event): #restart
+    global done, restart_done
+    if done and restart_done:
         begin()
+    if not restart_done:
+        return
 
 root=tk.Tk()
 root.geometry("400x400")
