@@ -1,3 +1,4 @@
+import hashlib
 import tkinter as tk
 import random 
 import time
@@ -15,6 +16,7 @@ number=0
 fade_duration=0
 start=0
 restart_done=False
+secret="do_uk_the_muffin_man"
 
 def color_on(): #initial green flash without fade 
     global start
@@ -74,26 +76,43 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
         label.config(bg="#121212", fg="#10B981", text=results)
         
         scores=[]
-
+        lines=[]
+        tampered=False
+        cntnt=""
         try:
             with open(file, "r") as f:
-                for i in f:
-                    cleaned=i.strip().replace("%", "")
-                    if cleaned:
-                        if "." in cleaned:
-                            cleaned=cleaned.split(". ")[1]
-                    scores.append(float(cleaned))
+                cntnt=f.read()
+                if "hash" in cntnt:
+                    scpart, svhash=cntnt.split("hash", 1)
+                    check=hashlib.sha256((scpart+secret).encode()).hexdigest()
+                    if check==svhash.strip():
+                        for i in scpart.split("\n"):
+                            cleaned=i.strip().replace("%", "")
+                            if cleaned:
+                                if ". " in cleaned:
+                                    cleaned=cleaned.split(". ")[1]
+                            scores.append(float(cleaned))
+                    else:
+                        tampered=True
+                        print("yo cheater. all ur results have been removed rofl. beginning from start :skull")
+                
         except FileNotFoundError:
             pass
 
-        scores.append(accuracy)
+        if not tampered:
+            scores.append(accuracy)
+        else:
+            scores=[accuracy]
         scores.sort(reverse=True)
 
+
+        for i, s in enumerate(scores):
+            lines.append(f"{i+1}. {s}%")
+        data="\n".join(lines)
+        tamper=hashlib.sha256((data+secret).encode()).hexdigest()
+        
         with open(file, "w") as f:
-            for i, score in enumerate(scores):
-                f.write(f"{i+1}. {score}%\n")
-
-
+            f.write(data+"\nhash\n"+tamper)
 
 def three():
     label.config(text="3")
