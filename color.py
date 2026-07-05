@@ -1,7 +1,7 @@
 import tkinter as tk
 import random 
 import time
-
+file="accuracy.txt"
 colors = ["#B0EBB6", "#B2ECC7", "#B5EDC9", "#B7EDCB", "#BAEECE", "#BCEED0", 
     "#BFEFD2", "#C1F0D4", "#C4F0D6", "#C6F1D9", "#C9F1DB", "#CBF2DD", 
     "#CEF3DF", "#D0F3E1", "#D3F4E4", "#D5F4E6", "#D8F5E8", "#DAF6EA", 
@@ -50,7 +50,7 @@ def spacedown(event): #registers keypress and begins timer
         label.config(bg="#ADEBB3", text="")
 
 def spaceup(event): #registers keyremoval, stops time, calculates accuracy and outputs
-    global pressed, done, randtime, attempt, restart_done
+    global pressed, done, randtime, attempt, restart_done, accuracy
     if not done or attempt:
         return
     
@@ -72,6 +72,28 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
             f"click r to restart"
             )
         label.config(bg="#121212", fg="#10B981", text=results)
+        
+        scores=[]
+
+        try:
+            with open(file, "r") as f:
+                for i in f:
+                    cleaned=i.strip().replace("%", "")
+                    if cleaned:
+                        if "." in cleaned:
+                            cleaned=cleaned.split(". ")[1]
+                    scores.append(float(cleaned))
+        except FileNotFoundError:
+            pass
+
+        scores.append(accuracy)
+        scores.sort(reverse=True)
+
+        with open(file, "w") as f:
+            for i, score in enumerate(scores):
+                f.write(f"{i+1}. {score}%\n")
+
+
 
 def three():
     label.config(text="3")
