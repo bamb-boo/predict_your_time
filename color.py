@@ -43,25 +43,35 @@ def color_off(): #color's done, match-time text
     label.config(bg="#FFFFFF", fg="#121212", text="try to match the time by holding the space key!")
     done=True
 
+last_press=0
 def spacedown(event): #registers keypress and begins timer
-    global userstart, pressed, done, attempt
+    global userstart, pressed, done, attempt, last_press
     if not done or attempt:
         return
+    last_press=time.perf_counter()
     if not pressed:
         pressed=True
         userstart=time.perf_counter()
         label.config(bg="#ADEBB3", text="")
 
 def spaceup(event): #registers keyremoval, stops time, calculates accuracy and outputs
-    global pressed, done, randtime, attempt, restart_done, accuracy
+    global pressed, done, randtime, attempt, restart_done, accuracy, released
     if not done or attempt:
+        return
+    
+    released=time.perf_counter()
+    root.after(25, lambda: checkactual(released))
+    
+def checkactual(released):
+    global pressed, attempt, restart_done, userstart, actual
+    if last_press>released:
         return
     
     if pressed:
         pressed=False
         attempt=True
         restart_done=True
-        userduration=round(time.perf_counter()-userstart, 2)
+        userduration=round(released-userstart, 2)
 
         accuracy=round((userduration/(actual))*100, 2)
         if accuracy > 100:
