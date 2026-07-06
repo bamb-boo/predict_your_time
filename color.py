@@ -15,6 +15,7 @@ colors = ["#B0EBB6", "#B2ECC7", "#B5EDC9", "#B7EDCB", "#BAEECE", "#BCEED0",
 number=0
 fade_duration=0
 start=0
+actual = 0
 restart_done=False
 secret="do_uk_the_muffin_man"
 
@@ -64,8 +65,7 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
 
         accuracy=round((userduration/(actual))*100, 2)
         if accuracy > 100:
-            correct_acc = accuracy-100
-            accuracy=100-correct_acc
+            accuracy = 100-(accuracy-100)
 
         results=(
             f"target {round(actual, 2)}s \n"
@@ -78,7 +78,7 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
         scores=[]
         lines=[]
         tampered=False
-        cntnt=""
+        cntnt=""    
         try:
             with open(file, "r") as f:
                 cntnt=f.read()
@@ -91,10 +91,10 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
                             if cleaned:
                                 if ". " in cleaned:
                                     cleaned=cleaned.split(". ")[1]
-                            scores.append(float(cleaned))
+                                    scores.append(float(cleaned))
                     else:
                         tampered=True
-                        print("yo cheater. all ur results have been removed rofl. beginning from start :skull")
+                        print("all ur results have been removed rofl. beginning from start...")
                 
         except FileNotFoundError:
             pass
@@ -108,11 +108,11 @@ def spaceup(event): #registers keyremoval, stops time, calculates accuracy and o
 
         for i, s in enumerate(scores):
             lines.append(f"{i+1}. {s}%")
-        data="\n".join(lines)
+        data="\n".join(lines)+"\n"
         tamper=hashlib.sha256((data+secret).encode()).hexdigest()
         
         with open(file, "w") as f:
-            f.write(data+"\nhash\n"+tamper)
+            f.write(data+"hash\n"+tamper)
 
 def three():
     label.config(text="3")
@@ -124,14 +124,13 @@ def one():
     label.config(text="1")
 
 def begin(): #to begin code, restart functionality
-    global randtime, total, pressed, done, userstart, attempt, totaltime, restart_done, userduration
-    actual=0
+    global randtime, total, pressed, done, userstart, attempt, totaltime, restart_done, userduration, actual
     randtime=round(random.uniform(1.0, 4.0),2)
     fade = (len(colors)-1)*10
     totaltime=fade/1000+randtime
     userstart=0.0
     userduration=0.0
-    pressed=True
+    pressed=False
     done=False
     restart_done=False
     attempt=False
@@ -143,7 +142,7 @@ def begin(): #to begin code, restart functionality
     root.after(2500, two)
     root.after(3500, one)
     root.after(4500, color_on)
-    root.after(4500+int(randtime*1000), lambda:color_change(number))
+    root.after(4500+int(randtime*1000), lambda:color_change(0))
 
 def restart(event): #restart
     global done, restart_done
